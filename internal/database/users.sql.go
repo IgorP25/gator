@@ -14,12 +14,7 @@ import (
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (id, created_at, updated_at, name)
-VALUES (
-    $1,
-    $2,
-    $3,
-    $4
-)
+VALUES ($1, $2, $3, $4 )
 RETURNING id, created_at, updated_at, name
 `
 
@@ -48,9 +43,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, created_at, updated_at, name
-FROM users
-WHERE name = $1
+SELECT id, created_at, updated_at, name FROM users WHERE name = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, name string) (User, error) {
@@ -65,12 +58,12 @@ func (q *Queries) GetUser(ctx context.Context, name string) (User, error) {
 	return i, err
 }
 
-const getUserById = `-- name: GetUserById :one
+const getUserByID = `-- name: GetUserByID :one
 SELECT id, created_at, updated_at, name FROM users WHERE id = $1
 `
 
-func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserById, id)
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByID, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -82,8 +75,7 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT id, created_at, updated_at, name
-FROM users
+SELECT id, created_at, updated_at, name FROM users
 `
 
 func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {

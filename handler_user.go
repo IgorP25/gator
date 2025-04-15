@@ -14,9 +14,11 @@ func handlerLogin(s *state, cmd command) error {
 		return fmt.Errorf("usage: %s <name>", cmd.Name)
 	}
 
-	user, err := s.db.GetUser(context.Background(), cmd.Args[0])
+	userName := cmd.Args[0]
+
+	user, err := s.db.GetUser(context.Background(), userName)
 	if err != nil {
-		return fmt.Errorf("user %s not found: %w", cmd.Args[0], err)
+		return fmt.Errorf("user %s not found: %w", userName, err)
 	}
 
 	err = s.cfg.SetUser(user.Name)
@@ -34,17 +36,18 @@ func handlerRegister(s *state, cmd command) error {
 		return fmt.Errorf("usage: %s <name>", cmd.Name)
 	}
 
+	cmdName := cmd.Args[0]
+
 	currentTime := time.Now()
 
 	user, err := s.db.CreateUser(context.Background(), database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: currentTime,
 		UpdatedAt: currentTime,
-		Name:      cmd.Args[0],
+		Name:      cmdName,
 	})
-
 	if err != nil {
-		return fmt.Errorf("couldn't add user %s: %w", cmd.Args[0], err)
+		return fmt.Errorf("couldn't add user %s: %w", cmdName, err)
 	}
 
 	err = s.cfg.SetUser(user.Name)
@@ -52,7 +55,7 @@ func handlerRegister(s *state, cmd command) error {
 		return fmt.Errorf("couldn't set current user: %w", err)
 	}
 
-	fmt.Printf("User has been registered: %s\n", user.Name)
+	fmt.Printf("User %s has been registered.\n", user.Name)
 
 	return nil
 }
